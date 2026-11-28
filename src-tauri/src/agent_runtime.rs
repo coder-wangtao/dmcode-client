@@ -120,6 +120,7 @@ pub fn start_agent_runtime(
     eprintln!("[AgentRuntime] start requested workspace={workspace:?}");
     let mut state = STATE.lock().map_err(|_| "agent runtime state poisoned")?;
 
+    //检查之前启动的 Java 子进程是否已经退出
     if let Some(child) = state.child.as_mut() {
         if let Ok(Some(_)) = child.try_wait() {
             state.child = None;

@@ -15,8 +15,11 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        //Dialog 插件
         .plugin(tauri_plugin_dialog::init())
+        //文件系统插件
         .plugin(tauri_plugin_fs::init())
+        //主要用于打开外部资源
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // 启动本地 HTTP Server（供 Spring Boot LocalExecuteAdkTool 调用）
@@ -24,6 +27,8 @@ pub fn run() {
             if let Err(error) = agent_runtime::start_agent_runtime(app.handle().clone(), None) {
                 eprintln!("[AgentRuntime] startup failed: {error}");
             }
+            //这段代码只在 macOS 和 Linux 上编译。它在后台等系统发来 SIGTERM 终止信号，
+            //收到后调用 app_handle.exit(0)，让 Tauri 走正常退出流程。
             #[cfg(unix)]
             {
                 let app_handle = app.handle().clone();
